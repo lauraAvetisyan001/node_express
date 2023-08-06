@@ -6,4 +6,4 @@ const removeContact = async(req, res) => {
     res.json(result)
 }
 
-module.exports = removeContact
+module.exports = removeContact;
