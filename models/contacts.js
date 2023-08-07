@@ -1,63 +1,54 @@
 const {Schema, model} = require('mongoose');
+const Joi = require('joi');
+const sex = ['men', 'women', 'other'];
+
+const phoneRegExp =  /^\d{3}-\d{2}-\d{3}-\d{2}-\d{2}$/;
 
 const contactSchema = new Schema({
     name: {
         type: String,
-        required: true
+        required: [true, 'Set name for contact']
     },
     email: {
+        type: String
+    },
+    phone: {
         type: String,
+        match: phoneRegExp,
+        unique: true,
         required: true
-    }
+    },
+    sex: {
+        type: String,
+        enum: sex,
+        required: true
+    },
+    favorite: {
+        type: Boolean,
+        default: false
+    },
+}, {versionKey: false, timestamps: true});
+
+const addSchema = Joi.object({
+    name: Joi.string().required(),
+    email: Joi.string(),
+    favorite: Joi.boolean(),
+    sex: Joi.string().valid(...sex),
+    phone: Joi.string().pattern(phoneRegExp).required()
 });
 
+const favoriteSchema = Joi.object({
+    favorite: Joi.boolean().required()
+})
+
+const schemas = {
+    addSchema,
+    favoriteSchema
+};
 
 const Contact = model('contact', contactSchema);
 
 module.exports = {
-    Contact
+    Contact,
+    schemas
 };
-// const fs = require('fs/promises');
-// const path = require('path')
-// const ObjectID = require('bson-objectid')
-
-// const contactsPath = path.join(__dirname, 'contacts.json')
-
-// const listContacts = async () => {
-//     const result = await fs.readFile(contactsPath)
-//     return JSON.parse(result)
-// }
-
-// const getContactById = async (id) => {
-//     const contacts = await listContacts()
-//     const result = contacts.find(data => data.id === id) 
-//     return result || null;
-// }
-
-// const removeContact = async (id) => {
-//     const contacts = await listContacts()
-//     const result = await contacts.splice(id, 1)
-//     await fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2))
-
-//     return result;
-// }
-
-// const addContact = async (name, email, phone) => {
-//     const contacts = await listContacts()
-//     const newContact = {
-//         name,
-//         email,
-//         phone,
-//         id: ObjectID()
-//     };
-//     contacts.push(newContact)
-//     await fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2))
-//     return newContact
-// }
-
-// module.exports = {
-//     listContacts,
-//     getContactById,
-//     removeContact,
-//     addContact
-// }
